@@ -8,11 +8,11 @@ function simpleTask() {
     let b = 'aboba';
     let f = Symbol('x');
     let c = true;
-    let d = null;
+    let ded = null;
     console.log(a, typeof a);
     console.log(b, typeof b);
     console.log(c, typeof c);
-    console.log(d, typeof d);
+    console.log(ded, typeof d);
     console.log(f, typeof f);
 }
 
