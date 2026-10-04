@@ -1,116 +1,95 @@
-'use strict'
+'use strict';
 
-function addSummerMode() {
-    // Функция для переключения летнего режима
-    function toggleSummerMode() {
-        const pageWrapper = document.getElementById('page_wrapper');
-        const mainSlider = document.querySelector('.main_slider_holder');
-        const newsBox = document.querySelector('.news_box');
-        const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+// ===== КОНСТАНТЫ =====
+const THEME_KEY = 'kaiSummerTheme';
+const BUTTON_ID = 'kai-summer-toggle-btn';
 
-        if (!pageWrapper) {
-            console.log('Элемент с id="page_wrapper" не найден');
-            return;
-        }
+// ===== СЛОЖНЫЙ СЕЛЕКТОР: два класса + псевдокласс =====
+const MENU_LINK_SELECTOR = '.box_links .link:not(:first-child)';
 
-        const currentBg = pageWrapper.style.backgroundColor;
-        const isSummer =
-            currentBg === 'rgb(255, 249, 196)' ||
-            currentBg === '#fff9c4';
+// ===== ПРИМЕНЕНИЕ / СНЯТИЕ ТЕМЫ (одна функция на оба случая) =====
+function setSummerTheme(on) {
+    const set = (el, prop, val) => { if (el) el.style[prop] = on ? val : ''; };
 
-        if (isSummer) {
-            // Возвращаем оригинальные стили
-            pageWrapper.style.backgroundColor = '';
-            pageWrapper.style.color = '';
-            pageWrapper.style.fontSize = '';
+    // 1–3. Основные стили страницы
+    const wrapper = document.getElementById('page_wrapper');
+    set(wrapper, 'backgroundColor', '#fff9c4');
+    set(wrapper, 'color', '#5d4037');
+    set(wrapper, 'fontFamily', 'Georgia, serif');
 
-            if (mainSlider) {
-                mainSlider.style.background = '#eee';
-            }
-            if (newsBox) {
-                newsBox.style.background = '#eee';
-            }
-            headings.forEach((heading) => {
-                heading.style.color = '';
-            });
-        } else {
-            // Устанавливаем летний режим
-            pageWrapper.style.backgroundColor = '#fff9c4';
-            pageWrapper.style.color = '#5d4037';
-            pageWrapper.style.fontSize = '20px';
+    // 4–5. Слайдер
+    const slider = document.querySelector('.main_slider_holder');
+    set(slider, 'background', '#fff9c4');
+    set(slider, 'borderBottom', '3px solid #ffb300');
 
-            if (mainSlider) {
-                mainSlider.style.background = '#fff9c4';
-            }
-            if (newsBox) {
-                newsBox.style.background = '#fff9c4';
-            }
-            headings.forEach((heading) => {
-                heading.style.color = '#ff6d00';
-            });
+    // 6–8. Блок новостей
+    const news = document.querySelector('.news_box');
+    set(news, 'background', '#fffde7');
+    set(news, 'borderLeft', '4px solid #ffb300');
+    set(news, 'padding', '15px');
+
+    // 9. Все ссылки
+    document.querySelectorAll('a').forEach(a => set(a, 'color', '#e65100'));
+
+    // 10. Сложный селектор + fontWeight
+    document.querySelectorAll(MENU_LINK_SELECTOR).forEach(a => set(a, 'fontWeight', 'bold'));
+
+    // 11. parentElement + children + borderRadius
+    if (news && news.parentElement) {
+        for (const child of news.parentElement.children) {
+            set(child, 'borderRadius', '12px');
         }
     }
 
-    // Создаем и добавляем кнопку в DOM
-    function createToggleButton() {
-        // Проверяем, не создана ли уже кнопка
-        if (document.getElementById('summer-mode-toggle-btn')) {
-            console.log('Кнопка уже добавлена');
-            return;
-        }
+    // 12. Заголовки
+    document.querySelectorAll('h1, h2, h3').forEach(h => set(h, 'color', '#ff6d00'));
 
-        const buttonContainer = document.querySelector('.box_links');
-        if (!buttonContainer) {
-            console.log('Не найден контейнер для кнопок');
-            return;
-        }
-
-        const button = document.createElement('div');
-        button.id = 'summer-mode-toggle-btn';
-        button.textContent = '☀️';
-        button.title = 'Переключить летний режим';
-
-        // Стили для кнопки
-        Object.assign(button.style, {
-            width: '30px',
-            height: '30px',
-            border: 'none',
-            backgroundColor: '#ff6d00',
-            color: 'white',
-            fontSize: '18px',
-            cursor: 'pointer',
-            margin: '0 0 0 6px',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-            textAlign: 'center',
-            float: 'left'
-        });
-
-        // Эффекты при наведении
-        button.addEventListener('mouseenter', () => {
-            button.style.transform = 'scale(1.1)';
-        });
-
-        button.addEventListener('mouseleave', () => {
-            button.style.transform = 'scale(1)';
-        });
-
-        // Обработчик клика
-        button.addEventListener('click', toggleSummerMode);
-
-        // Добавляем кнопку на страницу
-        buttonContainer.appendChild(button);
-
-        console.log('Кнопка переключения летнего режима добавлена');
-    }
-
-    // Запускаем создание кнопки
-    if (document.readyState === 'loading') {
-        console.log('Кнопка будет добавлена после загрузки');
-        document.addEventListener('DOMContentLoaded', createToggleButton);
-    } else {
-        console.log('Кнопка добавляется');
-        createToggleButton();
-    }
+    localStorage.setItem(THEME_KEY, on ? 'on' : 'off');
+    updateButton();
 }
 
-addSummerMode();
+// ===== КНОПКА =====
+function updateButton() {
+    const btn = document.getElementById(BUTTON_ID);
+    if (!btn) return;
+    const on = localStorage.getItem(THEME_KEY) === 'on';
+    btn.textContent = on ? '☀️ Лето: вкл' : '☀️ Лето: выкл';
+    btn.style.backgroundColor = on ? '#ffb300' : '#8bc34a';
+}
+
+function createButton() {
+    if (document.getElementById(BUTTON_ID)) return;
+    const container = document.querySelector('.box_links');
+    if (!container) return;
+
+    const btn = document.createElement('button');
+    btn.id = BUTTON_ID;
+    btn.title = 'Переключить летнюю тему';
+    Object.assign(btn.style, {
+        padding: '6px 12px',
+        border: 'none',
+        borderRadius: '20px',
+        color: '#fff',
+        fontSize: '14px',
+        cursor: 'pointer',
+        marginLeft: '8px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+    });
+    btn.addEventListener('click', () => {
+        setSummerTheme(localStorage.getItem(THEME_KEY) !== 'on');
+    });
+    container.appendChild(btn);
+    updateButton();
+}
+
+// ===== ИНИЦИАЛИЗАЦИЯ =====
+function init() {
+    if (localStorage.getItem(THEME_KEY) === 'on') setSummerTheme(true);
+    createButton();
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
