@@ -117,95 +117,95 @@ describe('Sudoku', () => {
   });
 
   describe('getGridString', () => {
-  let game;
+    let game;
 
-  beforeEach(() => {
-    game = new Sudoku().generate('easy');
-  });
+    beforeEach(() => {
+      game = new Sudoku().generate('easy');
+    });
 
-  test('renders header with column labels a..i', () => {
-    const str = game.getGridString();
-    // Буквы a..i должны присутствовать в шапке
-    expect(str).toContain('a');
-    expect(str).toContain('i');
-  });
+    test('renders header with column labels a..i', () => {
+      const str = game.getGridString();
+      // Буквы a..i должны присутствовать в шапке
+      expect(str).toContain('a');
+      expect(str).toContain('i');
+    });
 
-  test('uses double bar before row numbers', () => {
-    const str = game.getGridString();
-    // Двойная вертикальная черта ‖ отделяет номера строк
-    expect(str).toContain('‖');
-  });
+    test('uses double bar before row numbers', () => {
+      const str = game.getGridString();
+      // Двойная вертикальная черта ‖ отделяет номера строк
+      expect(str).toContain('‖');
+    });
 
-  test('uses single bar between 3x3 blocks', () => {
-    const str = game.getGridString();
-    // Одиночная вертикальная черта │ отделяет блоки 3x3
-    expect(str).toContain('│');
-  });
+    test('uses single bar between 3x3 blocks', () => {
+      const str = game.getGridString();
+      // Одиночная вертикальная черта │ отделяет блоки 3x3
+      expect(str).toContain('│');
+    });
 
-  test('uses underscore for empty cells', () => {
-    const str = game.getGridString();
-    // В лёгкой партии 40 пустых клеток — подчёркивания должны быть
-    expect(str).toContain('_');
-  });
+    test('uses underscore for empty cells', () => {
+      const str = game.getGridString();
+      // В лёгкой партии 40 пустых клеток — подчёркивания должны быть
+      expect(str).toContain('_');
+    });
 
-  test('does not use emoji squares', () => {
-    const str = game.getGridString();
-    // Старый вариант с ⬜ больше не используется
-    expect(str).not.toContain('⬜');
-  });
+    test('does not use emoji squares', () => {
+      const str = game.getGridString();
+      // Старый вариант с ⬜ больше не используется
+      expect(str).not.toContain('⬜');
+    });
 
-  test('contains horizontal dividers', () => {
-    const str = game.getGridString();
-    // Разделители блоков содержат эти символы
-    expect(str).toContain('═');
-    expect(str).toContain('─');
-  });
+    test('contains horizontal dividers', () => {
+      const str = game.getGridString();
+      // Разделители блоков содержат эти символы
+      expect(str).toContain('═');
+      expect(str).toContain('─');
+    });
 
-  test('renders exactly 9 data rows', () => {
-    const str = game.getGridString();
-    const lines = str.split('\n');
+    test('renders exactly 9 data rows', () => {
+      const str = game.getGridString();
+      const lines = str.split('\n');
 
-    // Считаем строки, начинающиеся с цифры 1..9
-    const dataRows = lines.filter((line) => /^[1-9]\s/.test(line));
-    expect(dataRows).toHaveLength(9);
-  });
+      // Считаем строки, начинающиеся с цифры 1..9
+      const dataRows = lines.filter((line) => /^[1-9]\s/.test(line));
+      expect(dataRows).toHaveLength(9);
+    });
 
-  test('each data row has 9 cells (excluding separators)', () => {
-    const str = game.getGridString();
-    const lines = str.split('\n');
+    test('each data row has 9 cells (excluding separators)', () => {
+      const str = game.getGridString();
+      const lines = str.split('\n');
 
-    const dataRows = lines.filter((line) => /^[1-9]\s/.test(line));
-    for (const row of dataRows) {
+      const dataRows = lines.filter((line) => /^[1-9]\s/.test(line));
+      for (const row of dataRows) {
       // Убираем номер строки, ‖ и │, потом считаем токены
-      const cleaned = row.replace(/^[1-9]\s+‖\s/, '').replace(/[│]/g, '');
-      const tokens = cleaned.trim().split(/\s+/);
-      // Каждая клетка окружена пробелами → токенов должно быть 9
-      // (т.к. pad добавляет ' ' вокруг значения, cell = " _ " → split даст ["_"])
-      // На практике: проверим, что цифр/подчёркиваний ровно 9
-      const cells = tokens.filter((t) => /^[1-9_]$/.test(t));
-      expect(cells).toHaveLength(9);
-    }
-  });
-
-  test('numeric values match grid', () => {
-    // Проверим, что все непустые клетки поля отражены в строке
-    const str = game.getGridString();
-    let countInGrid = 0;
-    let countInString = 0;
-
-    for (let r = 0; r < 9; r++) {
-      for (let c = 0; c < 9; c++) {
-        if (game.grid[r][c] !== 0) countInGrid++;
+        const cleaned = row.replace(/^[1-9]\s+‖\s/, '').replace(/[│]/g, '');
+        const tokens = cleaned.trim().split(/\s+/);
+        // Каждая клетка окружена пробелами → токенов должно быть 9
+        // (т.к. pad добавляет ' ' вокруг значения, cell = " _ " → split даст ["_"])
+        // На практике: проверим, что цифр/подчёркиваний ровно 9
+        const cells = tokens.filter((t) => /^[1-9_]$/.test(t));
+        expect(cells).toHaveLength(9);
       }
-    }
-    // Считаем цифры 1..9 в рендере (кроме номеров строк)
-    const lines = str.split('\n').filter((line) => /^[1-9]\s/.test(line));
-    for (const row of lines) {
-      const digits = row.slice(row.indexOf('‖') + 1).match(/[1-9]/g);
-      if (digits) countInString += digits.length;
-    }
+    });
 
-    expect(countInString).toBe(countInGrid);
+    test('numeric values match grid', () => {
+    // Проверим, что все непустые клетки поля отражены в строке
+      const str = game.getGridString();
+      let countInGrid = 0;
+      let countInString = 0;
+
+      for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < 9; c++) {
+          if (game.grid[r][c] !== 0) countInGrid++;
+        }
+      }
+      // Считаем цифры 1..9 в рендере (кроме номеров строк)
+      const lines = str.split('\n').filter((line) => /^[1-9]\s/.test(line));
+      for (const row of lines) {
+        const digits = row.slice(row.indexOf('‖') + 1).match(/[1-9]/g);
+        if (digits) countInString += digits.length;
+      }
+
+      expect(countInString).toBe(countInGrid);
+    });
   });
-});
 });
