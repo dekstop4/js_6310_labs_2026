@@ -1,5 +1,3 @@
-Конечно, вот цельный файл `README.md`. Скопируй его целиком и вставь в свой файл.
-
 ```markdown
 # Sudoku UI Library & Demo App
 

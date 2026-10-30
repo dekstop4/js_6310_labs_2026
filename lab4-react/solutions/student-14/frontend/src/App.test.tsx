@@ -28,26 +28,38 @@ describe('App Integration', () => {
     const { container } = render(<App />)
     
     const cells = container.querySelectorAll('[class*="cell"]')
+    const testCell = cells[2] // Выбираем третью ячейку
     
-    // Выбираем пустую ячейку
-    fireEvent.click(cells[2])
+    // Кликаем по ней
+    fireEvent.click(testCell)
     
     // Переключаем режим на "Заметка"
     fireEvent.click(screen.getByText('Заметка'))
     
     // Добавляем заметку 1
-    fireEvent.click(screen.getByText('1'))
+    fireEvent.click(screen.getByRole('button', { name: '1' }))
+    
+    // Проверяем, что в этой ячейке появился span с текстом 1
+    expect(testCell.querySelector('[class*="note"]')?.textContent).toContain('1')
+    
     // Добавляем заметку 2
-    fireEvent.click(screen.getByText('2'))
+    fireEvent.click(screen.getByRole('button', { name: '2' }))
     
-    // Проверяем, что они появились в сетке
-    const grid = container.querySelector('[class*="grid"]')
+    // Проверяем, что в ячейке теперь и 1, и 2
+    const notesAfterAdd = testCell.querySelectorAll('[class*="note"]')
+    const notesText = Array.from(notesAfterAdd).map(n => n.textContent).join('')
 
-    expect(grid?.textContent).toContain('12')
+    expect(notesText).toContain('12')
     
-    // Удаляем заметку 1 (повторный клик)
-    fireEvent.click(screen.getByText('1'))
-    expect(grid?.textContent).not.toContain('12')
+    // Удаляем заметку 1 (повторный клик по кнопке)
+    fireEvent.click(screen.getByRole('button', { name: '1' }))
+    
+    // Проверяем, что в ячейке осталась только 2
+    const notesAfterRemove = testCell.querySelectorAll('[class*="note"]')
+    const notesTextAfter = Array.from(notesAfterRemove).map(n => n.textContent).join('')
+
+    expect(notesTextAfter).not.toContain('1')
+    expect(notesTextAfter).toContain('2')
   })
 
   test('does not allow notes in cells with values', () => {
